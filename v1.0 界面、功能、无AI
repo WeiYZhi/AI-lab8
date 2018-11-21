@@ -1,0 +1,843 @@
+# -*- coding: utf-8 -*-
+
+
+#def actions(cb,newest)
+
+class Checkerboard:
+	
+	def __init__(self):
+		self.checkerboard=[[-1,-1,-1,-1,-1,-1],
+							[-1,-1,-1,-1,-1,-1],
+							[-1,-1,0,1,-1,-1],
+							[-1,-1,1,0,-1,-1],
+							[-1,-1,-1,-1,-1,-1],
+							[-1,-1,-1,-1,-1,-1]]
+		self.bcnt=2	# black count
+		self.wcnt=2	# white count
+		self.color=1 # black=1,white=0,black first
+	
+	
+	# clear all '+'
+	def clear_board(self):
+		cb=self.checkerboard
+		n=6
+		for i in range(n):
+			for j in range(n):
+				if cb[i][j]==3:
+					cb[i][j]=-1
+					
+					
+	def get_row(self,places,any_place):
+		cb=self.checkerboard
+		you=self.color
+		opponent=1-self.color
+		n=6
+		for i in range(n):
+			l_continuous_opponent=False # �����ĶԷ����ӱ���ס
+			r_continuous_opponent=False # �����ĶԷ����ӱ���ס
+			left_self=False
+			right_self=False
+			
+			# left to right
+			for j in range(n):
+				if cb[i][j]==you:
+					left_self=True
+					l_continuous_opponent=False									
+				if cb[i][j]==opponent:
+					if left_self==True:
+						l_continuous_opponent=True			
+				if cb[i][j]==-1 and left_self==True and l_continuous_opponent==True:
+					#cb[i][j]=3 # '+'
+					if (i,j) not in places:
+						places.append((i,j))
+					left_self=False
+					l_continuous_opponent=False	
+					any_place=True
+					#print('lr',i)
+					#self.draw(you)
+				if cb[i][j]==3:
+					l_continuous_opponent=False				
+					
+			# right to left
+			#for j in range(n-1,-1,-1):
+				if cb[i][n-1-j]==you:
+					right_self=True
+					#if continuous_opponent==True:
+					r_continuous_opponent=False									
+				if cb[i][n-1-j]==opponent:
+					if right_self==True:
+						r_continuous_opponent=True	
+					#right_self=False
+				if cb[i][n-1-j]==-1 and right_self==True and r_continuous_opponent==True:
+					#cb[i][n-1-j]=3
+					if (i,n-1-j) not in places:
+						places.append((i,n-1-j))
+					right_self=False
+					r_continuous_opponent=False	
+					any_place=True
+					#print('rl',i)
+					#self.draw(you)
+				if cb[i][n-1-j]==3:
+					r_continuous_opponent=False	
+		return places,any_place	
+		
+	def get_col(self,places,any_place):
+		cb=self.checkerboard
+		you=self.color
+		opponent=1-self.color
+		n=6
+		for i in range(n):
+			l_continuous_opponent=False # �����ĶԷ����ӱ���ס
+			r_continuous_opponent=False # �����ĶԷ����ӱ���ס
+			left_self=False
+			right_self=False
+			# up to down
+			for j in range(n):
+				if cb[j][i]==you:
+					left_self=True
+					#if continuous_opponent==True:
+					l_continuous_opponent=False									
+				if cb[j][i]==opponent:
+					if left_self==True:
+						l_continuous_opponent=True									
+				if cb[j][i]==-1 and left_self==True and l_continuous_opponent==True:
+					#cb[j][i]=3
+					if (j,i) not in places:
+						places.append((j,i))
+					left_self=False
+					l_continuous_opponent=False	
+					any_place=True
+					#print('ud')
+					#self.draw(you)
+				if cb[i][j]==3:
+					l_continuous_opponent=False
+			
+			# down to up
+			#for j in range(n-1,-1,-1):
+				if cb[n-1-j][i]==you:
+					right_self=True
+					#if continuous_opponent==True:
+					r_continuous_opponent=False									
+				if cb[n-1-j][i]==opponent:
+					if right_self==True:
+						r_continuous_opponent=True			
+				if cb[n-1-j][i]==-1 and right_self==True and r_continuous_opponent==True:
+					#cb[n-1-j][i]=3
+					if (n-1-j,i) not in places:
+						places.append((n-1-j,i))
+					right_self=False
+					r_continuous_opponent=False	
+					any_place=True
+					#print('du')
+					#self.draw(you)
+				if cb[i][j]==3:
+					r_continuous_opponent=False
+		return places,any_place
+		
+	# https://blog.csdn.net/zzz_cming/article/details/81035354
+	def get_diagonalline(self,places,any_place):
+		cb=self.checkerboard
+		you=self.color
+		opponent=1-self.color
+		n=6		
+		# \ Ԥ��
+		#---
+		list_1=[]
+		list_2=[]
+		#---
+		for i in range(n+n-1):
+			l_continuous_opponent=False # �����ĶԷ����ӱ���ס
+			r_continuous_opponent=False # �����ĶԷ����ӱ���ס
+			left_self=False
+			right_self=False
+			for j in range(i+1):
+				k=i-j
+				if k>=n or k<0 or j>=n:
+					continue	
+				#---		
+				list_1.append(j)
+				list_2.append(k)
+				#---
+				
+				# / ������				
+				if cb[k][j]==you:
+					left_self=True
+					l_continuous_opponent=False									
+				if cb[k][j]==opponent:
+					if left_self==True:
+						l_continuous_opponent=True				
+				if cb[k][j]==-1 and left_self==True and l_continuous_opponent==True:
+					#cb[k][j]=3
+					if (k,j) not in places:
+						places.append((k,j))
+					left_self=False
+					any_place=True
+					#print('right up')
+					#self.draw(you)
+				if cb[k][j]==3:
+					l_continuous_opponent=False
+					
+				# / ������
+				if cb[j][k]==you:
+					right_self=True
+					#if r_continuous_opponent==True:
+					r_continuous_opponent=False									
+				if cb[j][k]==opponent:
+					if right_self==True:
+						r_continuous_opponent=True				
+				if cb[j][k]==-1 and right_self==True and r_continuous_opponent==True:
+					#cb[j][k]=3
+					if (j,k) not in places:
+						places.append((j,k))
+					right_self=False
+					any_place=True		
+					#print('left down')
+					#self.draw(you)
+				if cb[j][k]==3:
+					r_continuous_opponent=False
+		
+		list_2=list(reversed(list_2))
+		l3=[1,2,3,4,5, 6, 5, 4, 3, 2, 1]
+		l4=[0,1,3,6,10,15,21,26,30,33,35]							
+		# \ ������		
+		for i in range(len(l3)):
+			num=l3[i]
+			start_index=l4[i]
+			l_continuous_opponent=False # �����ĶԷ����ӱ���ס
+			left_self=False	
+			for j in range(start_index,start_index+num):
+				x=list_1[j]
+				y=list_2[j]
+				#print('rightdown',x,y)
+				if cb[x][y]==you:
+					left_self=True
+					l_continuous_opponent=False									
+				if cb[x][y]==opponent:
+					if left_self==True:
+						l_continuous_opponent=True				
+				if cb[x][y]==-1 and left_self==True and l_continuous_opponent==True:
+					#cb[x][y]=3
+					#print('YES',1)
+					if (x,y) not in places:
+						places.append((x,y))
+					left_self=False
+					any_place=True
+					#print('right down')
+					#self.draw(you)
+				if cb[x][y]==3:
+					l_continuous_opponent=False
+			
+		# \ ������
+		for i in range(len(l3)):
+			#print('HEY!',1)
+			num=l3[i]
+			start_index=l4[i]
+			#print(start_index,num)
+			r_continuous_opponent=False # �����ĶԷ����ӱ���ס
+			right_self=False	
+			for j in range(start_index+num-1,start_index-1,-1):
+				#print('HEY!',2)
+				x=list_1[j]
+				y=list_2[j]
+				#print('leftup',x,y)
+				if cb[x][y]==you:
+					right_self=True
+					r_continuous_opponent=False									
+				if cb[x][y]==opponent:
+					if right_self==True:
+						r_continuous_opponent=True				
+				if cb[x][y]==-1 and right_self==True and r_continuous_opponent==True:
+					#cb[x][y]=3
+					#print('YES',2)
+					if (x,y) not in places:
+						places.append((x,y))
+					right_self=False
+					any_place=True
+					#print('left up',x,y)
+					#self.draw(you)
+				if cb[x][y]==3:
+					r_continuous_opponent=False
+			
+		return places,any_place		
+			
+	
+	
+	
+	#���ӷ�ʽ�����Լ���ɫ�����ӷ������̵Ŀո��ϣ������Լ����µ������ںᡢ����б�˸�����
+	#����һ���Լ������ӣ��򱻼����м�ĶԷ�����ȫ����ת���Ϊ�Լ������ӡ���ס��λ���ϱ�
+	#��ȫ���Ƕ��ֵ����ӣ������пո񡣲���ֻ���ڿ��Է�ת���ӵĵط��ſ������ӡ�
+	def get_place(self):
+	# �ҳ����Է����λ��
+		cb=self.checkerboard
+		co=self.color
+		n=6
+		
+		# 1.û��ͬɫ����
+		bcnt=self.bcnt
+		wcnt=self.wcnt
+		if co==1 and bcnt==0:
+			self.draw(10) # white win
+			return 
+		if co==0 and wcnt==0:
+			self.draw(9) # black win
+			return 
+		
+		# 2.��������
+		is_full=True
+		for i in range(n):
+			for j in range(n):
+				if cb[i][j]==-1:
+					is_full=False
+					break
+		if is_full:
+			# ��ǰ��ɫ������
+			self.draw(9+co)			
+			return
+			
+		# 3.��+
+		self.clear_board()
+		any_place=False	
+		places=[]	
+		places,any_place=self.get_row(places,any_place)
+		places,any_place=self.get_col(places,any_place)
+		places,any_place=self.get_diagonalline(places,any_place)
+		if any_place==False:
+			# ��ǰ��ɫ������
+			self.draw(9+co)
+			self.end_game()
+		
+		return places
+			
+			
+	def flip_row(self,flips,pos):
+		cb=self.checkerboard
+		you=self.color
+		opponent=1-self.color
+		x=pos[0]
+		y=pos[1]		
+		n=6		
+		
+		# left side
+		for j in range(y-1,-1,-1):		
+			if cb[x][j]==you:		
+				for k in range(j+1,y):
+					if cb[x][k]==opponent:
+						if (x,k) not in flips:
+							flips.append((x,k))
+				break		
+			'''			
+			if cb[x][j]==opponent:
+				l_continuous_opponent=True				
+			if cb[x][j]==opponent and left_self==True:				
+				#cb[x][j]=you	
+				if (x,j) not in flips:
+					flips.append((x,j))
+			'''		
+		# right side
+		for j in range(y+1,n):
+			if cb[x][j]==you:		
+				for k in range(y+1,j):
+					if cb[x][k]==opponent:
+						if (x,k) not in flips:
+							flips.append((x,k))
+				break		
+			'''
+			if cb[x][j]==you:	
+				right_self=True	
+				r_continuous_opponent=False	
+				break								
+			if cb[x][j]==opponent:
+				#r_continuous_opponent=True	
+				#cb[x][j]=you
+				if (x,j) not in flips:
+					flips.append((x,j))
+				can_flip=True
+			'''
+		return flips
+			
+				
+	def flip_col(self,flips,pos):
+		cb=self.checkerboard
+		you=self.color
+		opponent=1-self.color
+		x=pos[0]
+		y=pos[1]		
+		n=6		
+		# above
+		for j in range(x-1,-1,-1):		
+			if cb[j][y]==you:		
+				for k in range(j+1,x):
+					if cb[k][y]==opponent:
+						if (k,y) not in flips:
+							flips.append((k,y))
+				break		
+		
+		# below
+		for j in range(x+1,n):
+			if cb[j][y]==you:		
+				for k in range(j-1,x,-1):
+					if cb[k][y]==opponent:
+						if (k,y) not in flips:
+							flips.append((k,y))
+				break		
+		return flips
+		
+	
+	def flip_diagonal(self,flips,pos):
+		cb=self.checkerboard
+		you=self.color
+		opponent=1-self.color
+		n=6	
+		x=pos[0]
+		y=pos[1]
+					
+		list_1=[]
+		list_2=[]	
+		num_idx=0	
+		for i in range(n+n-1):
+			for j in range(i+1):
+				k=i-j			
+				if k>=0 and k<n and j<n:
+					list_1.append(j)
+					list_2.append(k)				
+					if j==x and k==y:
+						num_idx=i
+		#print(list_1)
+		#print(list_2)	
+				
+		#print(num_idx)
+		l3=[1,2,3,4,5, 6, 5, 4, 3, 2, 1]
+		l4=[0,1,3,6,10,15,21,26,30,33,35]		
+		
+		num=l3[num_idx]
+		start_idx=l4[num_idx]
+		
+		l5=[]
+		l6=[]
+		for i in range(num):
+			l5.append(list_1[start_idx+i])
+			l6.append(list_2[start_idx+i])
+		#print(l5)
+		#print(l6)
+		
+		# / ������
+		for i in range(num):
+			k=l5[i]
+			j=l6[i]
+			#print(k,j)
+			if k==x and j==y:
+				for o in range(i+1,num):
+					k=l5[o]
+					j=l6[o]
+					#print(k,j)									
+					if cb[k][j]==you:		
+						#print('ru')	
+						for m in range(i+1,o):
+							k=l5[m]
+							j=l6[m]
+							if cb[k][j]==opponent:
+								if (k,j) not in flips:
+									flips.append((k,j))
+						break		
+				
+		for i in range(num):
+			k=l5[i]
+			j=l6[i]
+			#print(k,j)
+			if k==x and j==y:
+				#print(j,k)
+				for o in range(i+1,num):
+					k=l5[o]
+					j=l6[o]
+					#print(k,j)
+					# / ������
+					if cb[j][k]==you:
+						#print(j,k)
+						#print('ld')	
+						for m in range(i+1,o):
+							k=l5[m]
+							j=l6[m]
+							#print(j,k)
+							if cb[j][k]==opponent:
+								#print('f',j,k)
+								if (j,k) not in flips:
+									flips.append((j,k))
+						break	
+		
+							
+		# \ ������
+		list_2=list(reversed(list_2))
+		#print(list_2)
+		
+		for i in range(n+n-1):
+			#print(l4[i]+j)
+			if l4[i]+j<36:
+				if list_1[l4[i]+j]==x and list_2[l4[i]+j]==y:
+					break
+				for j in range(l3[i]):	
+					#print(list_1[l4[i]+j],list_2[l4[i]+j])							
+					if list_1[l4[i]+j]==x and list_2[l4[i]+j]==y:
+						#print('!')
+						num_idx=i
+						break
+			
+		#print(l3)
+		#print(num_idx)			
+		num=l3[num_idx]
+		#print(num)
+		start_idx=l4[num_idx]
+		#l_continuous_opponent=False # �����ĶԷ����ӱ���ס
+		#r_continuous_opponent=False # �����ĶԷ����ӱ���ס
+
+		l7=[]
+		l5=[]
+		for i in range(num):
+			l5.append(list_1[start_idx+i])
+			l7.append(list_2[start_idx+i])
+		#print(l5)
+		#print(l7)
+		#print('rd')	
+		for i in range(num):	
+			k=l5[i]
+			j=l7[i]
+			#print(k,j)
+			if k==x and j==y:
+				for o in range(i+1,num):
+					k=l5[o]
+					j=l7[o]
+					#print(k,j)
+					if cb[k][j]==you:	
+						#print('rd')			
+						for m in range(i+1,o):
+							k=l5[m]
+							j=l7[m]							
+							if cb[k][j]==opponent:
+								if (k,j) not in flips:
+									flips.append((k,j))
+						break	
+			
+		# \ ������		
+		#l_continuous_opponent=False # �����ĶԷ����ӱ���ס
+		#r_continuous_opponent=False # �����ĶԷ����ӱ���ס
+		for i in range(num-1,-1,-1):	
+			k=l5[i]
+			j=l7[i]
+			#print(k,j)
+			if k==x and j==y:
+				for o in range(i-1,-1,-1):	
+					k=l5[o]
+					j=l7[o]	
+					#print(k,j)
+					if cb[k][j]==you:	
+						#print('LU')	
+						for m in range(i-1,o,-1):
+							k=l5[m]
+							j=l7[m]							
+							if cb[k][j]==opponent:
+								if (k,j) not in flips:
+									flips.append((k,j))
+						break	
+						
+		return flips
+		
+		
+	
+	
+	def flip(self,pos):
+		flipped=[]
+		flipped=self.flip_row(flipped,pos)
+		flipped=self.flip_col(flipped,pos)
+		flipped=self.flip_diagonal(flipped,pos)
+		#for tu in flipped:
+		#		cb[tu[0]][tu[1]]=co		
+		return flipped
+		
+	
+	def put_chess(self,pos):
+		cb=self.checkerboard
+		co=self.color
+		x=pos[0]
+		y=pos[1]
+		if cb[x][y]==3:
+			cb[x][y]=co
+			pos=(x,y)
+			flipped=self.flip(pos)
+			
+			#print(flips)			
+			for tu in flipped:
+				cb[tu[0]][tu[1]]=co		
+			
+			self.color=1-self.color	
+			
+			places=self.get_place()
+			for tu in places:
+				self.checkerboard[tu[0]][tu[1]]=3
+			
+			#self.draw(self.color)	
+			return flipped
+		return []
+		
+	
+	# pos-Ҫ����������λ��, flipped-����ת��λ���б�
+	def undo(self,pos,flipped):
+		co=self.color
+		opco=1-co
+		cb=self.checkerboard
+		
+		cb[pos[0]][pos[1]]=-1
+		for p in flipped:
+			cb[pos[0]][pos[1]]=opco			
+	
+		
+	def draw(self, alive):
+	# 6*6 checkerboard
+	# chess=(x,y) new chess position
+	# alive=1 alive;0 you lose;-1 ai lose
+		print('='*60)
+		if alive==9:
+			print('BLACK WIN')			
+		elif alive==10:
+			print('WHITE WIN')			
+		elif alive==1:
+			print('BLACK CHESS ROUND')
+		elif alive==0:
+			print('WHITE CHESS ROUND')
+		print()	
+		
+		#for tu in places:
+		#	self.checkerboard[tu[0]][tu[1]]=3
+			
+		self.bcnt=0
+		self.wcnt=0	
+		print('   1   2   3   4   5   6  ')
+		#columns=['A','B','C','D','E','F']
+		print('-'*26)
+		for i in range(6):
+			for j in range(6):
+				if j==0:
+					print(i+1,end='')
+				ch=' '
+				if self.checkerboard[i][j]==-1: #null
+					ch=' '
+				elif self.checkerboard[i][j]==1: # black
+					ch='x'
+					self.bcnt+=1
+				elif self.checkerboard[i][j]==0: # white
+					ch='o'
+					self.wcnt+=1
+				elif self.checkerboard[i][j]==3: # canput
+					ch='+'
+				
+				print('|',ch,'',end='')
+			print('|')
+			print('-'*26)
+		
+		print()
+		print('black chess:',self.bcnt,'  white chess:',self.wcnt)
+		
+
+	
+	def start_game(self):
+		print('='*60)
+		self.color=input('Choose your color(0-white, 1-black, black first): ')
+		print('='*60)
+		print('Game start')
+		print('x -black chess, o -white chess, + -place to put chess')
+		
+		self.color=int(self.color)	
+		if self.color==1:
+			self.checkerboard[3][4]=3
+			self.checkerboard[4][3]=3	
+			self.checkerboard[1][2]=3
+			self.checkerboard[2][1]=3
+		elif self.color==0:
+			self.checkerboard[1][3]=3
+			self.checkerboard[2][4]=3	
+			self.checkerboard[3][1]=3
+			self.checkerboard[4][2]=3
+			
+		#places=self.get_place()		
+		self.draw(self.color)
+	
+	
+	def end_game(self):
+		print('Game end')
+		
+
+
+class Player:
+	def __init__(self,color):
+		self.color=color
+		
+	def think(self,cb):
+		pass
+		
+	def undo(self,board,pos,flipped):
+		board.undo(pos,flipped)
+		
+	
+class HumanPlayer(Player):
+	def __init__(self,color):
+		super().__init__(color)
+	
+	def think(self,board):
+		co=self.color
+		cb=board.checkerboard
+		
+		flag=False
+		while flag==False:
+			print('='*60)
+			print("Put a chess in a '+' block.")
+			x=input("Input the row index: ")
+			y=input("Input the column index: ")
+			x=int(x)-1
+			y=int(y)-1			
+			if cb[x][y]==3:
+				flag=True
+				pos=(x,y)
+				flipped=board.put_chess(pos)						
+				board.draw(self.color)		
+			if not flag:
+				print("This block is not allow to put a chess, choose another one.")
+		
+
+
+class AI:
+	def __init__(self):
+		
+		# ����λ��Ȩ�أ��ο���https://github.com/k-time/ai-minimax-agent/blob/master/ksx2101.py
+		'''
+		self.weight_board=[[120, -20,  20,   5,   5,  20, -20, 120],
+							[-20, -40,  -5,  -5,  -5,  -5, -40, -20],
+							[ 20,  -5,  15,   3,   3,  15,  -5,  20],
+							[  5,  -5,   3,   3,   3,   3,  -5,   5],
+							[  5,  -5,   3,   3,   3,   3,  -5,   5],
+							[ 20,  -5,  15,   3,   3,  15,  -5,  20],
+							[-20, -40,  -5,  -5,  -5,  -5, -40, -20],
+							[120, -20,  20,   5,   5,  20, -20, 120]]
+		'''
+		self.weight_board=[[120,  -20,  13, 13, -20, 120],
+							[-20, -40,  -5, -5, -40, -20],
+							[ 13,  -5,   6,  6,  -5,  13],
+							[ 13,  -5,   6,  6,  -5,  13],
+							[-20, -40,  -5, -5, -40, -20],
+							[120, -20,  13, 13, -20, 120]]
+							
+	def evaluate(self,cb):
+	# black-max, white-min
+		#co=self.color
+		#opco=1-co
+		wb=self.weight_board
+		n=6
+		score=0
+		for i in range(n):
+			for j in range(n):
+				if cb[i][j]==co:
+					score+=wb[i][j]
+				elif cb[i][j]==opco:
+					score-=wb[i][j]
+		return score
+		
+	
+	def brain(self,cb,opco,depth):
+		return
+		
+	
+	# board-���̶���,opponent-����ж���
+	# ����ʼΪ-��, �³�ʼΪ��
+	def minimax_alpha_beta(self,board,opponent,depth=8,\
+	my_best=-float('inf'),opp_best=float('inf')):
+		co=self.color
+		#opco=1-co
+		cb=board.checkerboard
+		
+		# enough
+		if depth==0:
+			return self.evaluate(cb),None
+			
+		actions=board.get_place()
+		if not places:
+			board.draw(9+co,places)
+			board.end_game()
+		
+		best_score=my_best	
+		best_action=[]
+		
+		for ac in actions:
+			# ac is tuple, flips-list of flipped places
+			flipped=board.put_chess(ac)
+			
+			# �������, �ֵ�����
+			# opp_best�ǵ��˵Ħ�
+			score, _ = opponent.minimax_alpha_beta(board,self,\
+			depth-1,-opp_best,-best_score)
+			
+			
+		
+		
+		
+		
+		
+		
+		
+		
+		
+				
+class AIPlayer(Player, AI):
+	def __init__(self,color):
+		super().__init__(color) # init Player
+		super(Player,self).__init__() # init AI
+	
+	def think(self,board):
+		co=self.color
+		opco=1-self.co
+		opponent=AIPlayer(opco)
+		action=self.brain(board,opponent,4)
+		return action
+
+
+
+
+		
+
+
+def test_draw():		
+	board=Checkerboard()
+	board.start_game()
+	color=board.color
+	player=HumanPlayer(color)
+	player.think(board)
+	player.think(board)
+	player.think(board)
+	player.think(board)
+	player.think(board)
+	player.think(board)
+	player.think(board)
+	player.think(board)
+	player.think(board)
+	player.think(board)
+	#for i in range(6):
+	#	for j in range(6):
+	#		cb.checkerboard[i][j]=(i+j)%2
+	#cb.checkerboard[3][3]=3
+	#print(cb.checkerboard)
+	#cb.draw(1-color)
+	#cb.draw(1-color)
+	#cb.draw(9)
+	print('='*60)
+	
+test_draw()
+
+
+
+
+
+
+
+
+
+
+
+
+
+			
