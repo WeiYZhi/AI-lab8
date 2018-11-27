@@ -4,7 +4,7 @@ import random
 import time
 import copy
 
-filename='out-human-alphabeta-prune-1.txt'
+filename='out-human-vs-prune.txt'
 
 class Checkerboard:
 	
@@ -17,7 +17,7 @@ class Checkerboard:
 							[-1,-1,-1,-1,-1,-1]]
 		self.bcnt=2	# black count
 		self.wcnt=2	# white count
-		self.color=1	# black=1,white=0,black first
+		self.color=1 # black=1,white=0,black first
 		self.weight_board=[[120,  -20,  13, 13, -20, 120],
 							[-20, -40,  -5, -5, -40, -20],
 							[ 13,  -5,   6,  6,  -5,  13],
@@ -26,10 +26,10 @@ class Checkerboard:
 							[120, -20,  13, 13, -20, 120]]
 							
 							
-	def evaluate(self):
+	def evaluate(self,color):
 	# black-max, white-min
 		cb=self.checkerboard
-		co=self.color
+		co=color
 		opco=1-co
 		wb=self.weight_board
 		n=6
@@ -40,6 +40,7 @@ class Checkerboard:
 					score+=wb[i][j]
 				elif cb[i][j]==opco:
 					score-=wb[i][j]
+			
 		return score
 	
 	# clear all '+'
@@ -210,12 +211,6 @@ class Checkerboard:
 						if (k,j) not in places:
 							places.append((k,j))
 					
-						#any_place=True
-					#print('right up')
-					#self.draw(you)
-				#if cb[k][j]==3:
-				#	l_continuous_opponent=False
-					
 				# / 向左下
 				if cb[j][k]==you:
 					right_self=True
@@ -230,13 +225,7 @@ class Checkerboard:
 					#cb[j][k]=3
 						if (j,k) not in places:
 							places.append((j,k))
-					
-						#any_place=True		
-					#print('left down')
-					#self.draw(you)
-				#if cb[j][k]==3:
-				#	r_continuous_opponent=False
-		
+							
 		list_2=list(reversed(list_2))
 		l3=[1,2,3,4,5, 6, 5, 4, 3, 2, 1]
 		l4=[0,1,3,6,10,15,21,26,30,33,35]							
@@ -263,13 +252,7 @@ class Checkerboard:
 					#print('YES',1)
 						if (x,y) not in places:
 							places.append((x,y))
-					
-						#any_place=True
-					#print('right down')
-					#self.draw(you)
-				#if cb[x][y]==3:
-				#	l_continuous_opponent=False
-			
+							
 		# \ 向左上
 		for i in range(len(l3)):
 			#print('HEY!',1)
@@ -295,13 +278,7 @@ class Checkerboard:
 					#cb[x][y]=3
 					#print('YES',2)
 						if (x,y) not in places:
-							places.append((x,y))
-					
-						#any_place=True
-					#print('left up',x,y)
-					#self.draw(you)
-				#if cb[x][y]==3:
-				#	r_continuous_opponent=False
+							places.append((x,y))				
 			
 		return places
 	
@@ -375,14 +352,6 @@ class Checkerboard:
 						if (x,k) not in flips:
 							flips.append((x,k))
 				break		
-			'''			
-			if cb[x][j]==opponent:
-				l_continuous_opponent=True				
-			if cb[x][j]==opponent and left_self==True:				
-				#cb[x][j]=you	
-				if (x,j) not in flips:
-					flips.append((x,j))
-			'''		
 		# right side
 		for j in range(y+1,n):
 			if cb[x][j]==-1:
@@ -393,18 +362,6 @@ class Checkerboard:
 						if (x,k) not in flips:
 							flips.append((x,k))
 				break		
-			'''
-			if cb[x][j]==you:	
-				right_self=True	
-				r_continuous_opponent=False	
-				break								
-			if cb[x][j]==opponent:
-				#r_continuous_opponent=True	
-				#cb[x][j]=you
-				if (x,j) not in flips:
-					flips.append((x,j))
-				can_flip=True
-			'''
 		return flips
 			
 				
@@ -588,7 +545,6 @@ class Checkerboard:
 		self.wcnt=0	
 		print('   0   1   2   3   4   5   ')
 		print('   0   1   2   3   4   5   ',file=f)
-		#columns=['A','B','C','D','E','F']
 		print('-'*26)
 		print('-'*26,file=f)
 		for i in range(6):
@@ -663,14 +619,17 @@ class Player:
 	def __init__(self,color):
 		self.color=color
 		
+	
+	def evaluate(self,board):
+		return board.evaluate(self.color)
 		
+	
 	def think(self,cb):
 		pass
 		
 		
 	def put_chess(self,board,pos,co):
 		flipped=board.put_chess(pos,co)
-		#print('2',flipped)
 		return flipped
 	
 	
@@ -689,11 +648,6 @@ class HumanPlayer(Player):
 		co=self.color
 		cb=board.checkerboard
 		
-		#places=board.get_place(co)
-		#print(places)
-			
-		#for tu in places:
-		#	board.checkerboard[tu[0]][tu[1]]=3	
 			
 		flag=False
 		while flag==False:
@@ -719,14 +673,14 @@ class HumanPlayer(Player):
 				
 				flipped=self.put_chess(board,pos,co)
 				
-				score=board.evaluate()				
+				score=self.evaluate(board)			
 				print('='*60)
 				print('score=',score)
 				f=open(filename,'a')
 				print('='*60,file=f)
 				print('score=',score,file=f)
 				f.close()
-	
+				
 				# 对方回合
 				opp_places=board.get_place(1-co)
 				if not opp_places:
@@ -750,43 +704,12 @@ class AI:
 		self.level=lev
 		#self.choice=['random','minimax-alpha-beta'][self.level]
 		# 棋盘位置权重，参考：https://github.com/k-time/ai-minimax-agent/blob/master/ksx2101.py
-		'''
-		self.weight_board=[[120, -20,  20,   5,   5,  20, -20, 120],
-							[-20, -40,  -5,  -5,  -5,  -5, -40, -20],
-							[ 20,  -5,  15,   3,   3,  15,  -5,  20],
-							[  5,  -5,   3,   3,   3,   3,  -5,   5],
-							[  5,  -5,   3,   3,   3,   3,  -5,   5],
-							[ 20,  -5,  15,   3,   3,  15,  -5,  20],
-							[-20, -40,  -5,  -5,  -5,  -5, -40, -20],
-							[120, -20,  20,   5,   5,  20, -20, 120]]
-		'''
-	'''
-		self.weight_board=[[120,  -20,  13, 13, -20, 120],
-							[-20, -40,  -5, -5, -40, -20],
-							[ 13,  -5,   6,  6,  -5,  13],
-							[ 13,  -5,   6,  6,  -5,  13],
-							[-20, -40,  -5, -5, -40, -20],
-							[120, -20,  13, 13, -20, 120]]
-							
-	def evaluate(self,cb):
-	# black-max, white-min
-		co=self.color
-		opco=1-co
-		wb=self.weight_board
-		n=6
-		score=0
-		for i in range(n):
-			for j in range(n):
-				if cb[i][j]==co:
-					score+=wb[i][j]
-				elif cb[i][j]==opco:
-					score-=wb[i][j]
-		return score
-	'''	
+
 	
 	def brain(self,board,opponent,depth=8):
 		if self.level:
 			best_score,action=self.minimax_alpha_beta(board,opponent,depth)			
+			
 			print('='*60)
 			print('score=',best_score)
 			
@@ -797,7 +720,9 @@ class AI:
 			
 		else:
 			action=self.random_choice(board)
-			score=board.evaluate()
+			
+			score=self.evaluate(board)
+				
 			print('='*60)
 			print('score=',score)
 			
@@ -811,15 +736,9 @@ class AI:
 	
 	def random_choice(self,board):
 		co=self.color
-		#actions=board.get_place(co)
 		actions=board.get_marked()
 		
-		#print(actions)
-		#for a in actions:
-		#	print(board.checkerboard[a[0]][a[1]])
-		
 		action=random.choice(actions)
-		#print('!',action)
 		return action
 	
 	
@@ -832,18 +751,13 @@ class AI:
 		
 		# enough
 		if depth==0:
-			return board.evaluate(),None
+			return self.evaluate(board),None
 			
-		#actions=board.get_place(1-co)
 		actions=board.get_marked()
 		
 		if not actions:
-			return board.evaluate(),None
-			# 当前颜色棋子输
-			#self.draw(9+co)
-			#self.end_game()
-		#actions=board.get_marked()
-		
+			return self.evaluate(board),None
+			
 		best_score=my_best	
 		best_action=None
 		
@@ -851,14 +765,8 @@ class AI:
 			# ac is tuple, flips is list of flipped places
 			flipped=board.put_chess(ac,co)
 			
-			#actions=board.get_place(1-co)
 			opp_actions=board.get_place(1-co)
-			
-			#ch=['white','black'][co]
-			#print('='*60)
-			#print('trying ',ch,' action: ',ac)
-			#board.draw(1-co)
-			
+		
 			# 深度优先, 轮到陪练
 			# opp_best是敌人的α
 			score, opp_action = opponent.minimax_alpha_beta(board,self,\
@@ -873,8 +781,6 @@ class AI:
 			
 			# 大于祖先节点中的β, 剪枝
 			if best_score>opp_best:
-				#print('prune, opp_best=',opp_best,\
-				#' ,best score=',best_score)
 				break
 		
 		board.checkerboard=cb
@@ -907,24 +813,18 @@ class AIPlayer(Player, AI):
 		print(ch,' action: ',pos)
 		print('='*60,file=f)
 		print(ch,' action: ',pos,file=f)
-		
-		#print(cb[pos[0]][pos[1]])
 
 		flipped=self.put_chess(board,pos,co)		
 		print('flipped',flipped)
 		print('flipped',flipped,file=f)
 		
 		f.close()
-		#board.checkerboard[pos[0]][pos[1]]=co
 		
 		# 获取另一颜色的+
 		opco=1-co				
 		places=board.get_place(opco)
 		if not places:
 			# 对方颜色棋子输
-			#board.clear_board()
-			#board.draw(10-co)
-			#board.draw(1-co)
 			board.end_game(co)		
 		
 		else:
@@ -942,9 +842,7 @@ class Game:
 		print('='*60)
 		mode=input('Choose battle mode(0-pve, 1-ai vs ai): ')
 		mode=int(mode)
-		#filename=''
 		if not mode:
-			#filename='human vs ai.txt'
 			f=open(filename,'w')
 			print('>>> Human vs AI',file=f)
 			color=input('Choose your color(0-white, 1-black, black first): ')
@@ -968,7 +866,6 @@ class Game:
 				player2=HumanPlayer(human_color)
 		
 		else:
-			#filename='ai vs ai.txt'
 			f=open(filename,'w')			
 			print('>>> AI vs AI',file=f)
 			color1=input('Choose AI_1 color(0-white, 1-black, black first): ')
@@ -1033,44 +930,6 @@ class Game:
 			print('='*60)
 			print('think time=',think_end-think_start)
 			
-			#f=open(filename,'a')		
-			#print('='*60,file=f)
-			#print('think time=',think_end-think_start,file=f)
-			#f.close()
-			#places=self.board.get_place(1-self.current_player.color)
-		
-
-'''
-def test_draw():		
-	board=Checkerboard()
-	board.start_game()
-	color=board.color
-	player=HumanPlayer(color)
-	player.think(board)
-	player.think(board)
-	player.think(board)
-	player.think(board)
-	player.think(board)
-	player.think(board)
-	player.think(board)
-	player.think(board)
-	player.think(board)
-	player.think(board)
-	#for i in range(6):
-	#	for j in range(6):
-	#		cb.checkerboard[i][j]=(i+j)%2
-	#cb.checkerboard[3][3]=3
-	#print(cb.checkerboard)
-	#cb.draw(1-color)
-	#cb.draw(1-color)
-	#cb.draw(9)
-	print('='*60)
-'''
-	
-
-
-	
-#test_draw()
 
 game=Game()
 game.run()
