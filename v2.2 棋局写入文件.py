@@ -17,7 +17,7 @@ class Checkerboard:
 							[-1,-1,-1,-1,-1,-1]]
 		self.bcnt=2	# black count
 		self.wcnt=2	# white count
-		self.color=1 # black=1,white=0,black first
+		self.color=1	# black=1,white=0,black first
 		self.weight_board=[[120,  -20,  13, 13, -20, 120],
 							[-20, -40,  -5, -5, -40, -20],
 							[ 13,  -5,   6,  6,  -5,  13],
